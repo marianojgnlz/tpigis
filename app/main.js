@@ -16,7 +16,7 @@ const test = new Image({
   })
 }
 )
-
+// llllllllllllllllllllllllllllllll
 const map = new Map({
   target: 'map',
   layers: [
