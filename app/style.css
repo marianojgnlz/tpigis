@@ -32,7 +32,7 @@ html, body {
  
 }
 
-#capas{
+#capasContainer{
   position: relative;
-  padding-left: 50px;
+  padding-left: 5px;
 }
