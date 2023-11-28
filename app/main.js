@@ -83,7 +83,7 @@ const act_agrop = new Image({
 
 const act_economicas = new Image({
   title: "Actividades Económicas",
-  visible: true,
+  visible: false,
   source: new ImageWMS({
     url: url,
     params: {
@@ -707,6 +707,7 @@ var formatLength = function (line) {
   var output = Math.round(length * 10000) / 100 + ' ' + 'km';
   return output;
 };
+
 draw.on('drawstart', function (evt) {
   helpTooltipElement.classList.add('hidden');
   var sketch = evt.feature;
