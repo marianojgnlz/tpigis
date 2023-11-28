@@ -7,15 +7,24 @@
     <title>Using OpenLayers with Vite</title>
   </head>
   <body>
+    <div id="header">
+      <h1>Mapita</h1>
+      <div class="interactions">
+        <button id="measure">Medir</button>
+        <button id="line">Linea</button>
+        <button id="save_line">Guardar</button>
+        <button id="clear">Limpiar</button>
+      </div>
+    </div>
     
-    <div id="map"></div>
-    
-    <div class="interactions">
-      <button id="measure">Medir</button>
-      <button id="point">Punto</button>
-      <button id="clear">Limpiar</button>
+    <div id="map-container">
+      <div id="map"></div>
     </div>
 
+    <dialog id="add_feature_dialog">
+      <input id="feature_name" type="text" />
+    </dialog>
+    
     <script type="module" src="./main.js"></script>
   </body>
 </html>

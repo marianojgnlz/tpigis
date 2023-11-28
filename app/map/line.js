@@ -7,22 +7,22 @@ export const vectorLayer = new VectorLayer({
     source: vectorSource,
 });
 
-const PointDraw = new Draw({
+const LineDraw = new Draw({
     source: vectorSource,
-    type: 'Point'
+    type: 'LineString'
   });
 
 
 
 // function addGeom() {}
 
-export function addPoint(map) {
+export function addLine(map) {
     // map.on('click', addGeom);
-    map.addInteraction(PointDraw);
+    map.addInteraction(LineDraw);
     map.getViewport().style.cursor = 'none';
 }
 
 
-export function removePoint(map) {
-    map.removeInteraction(PointDraw);
+export function removeLine(map) {
+    map.removeInteraction(LineDraw);
 }

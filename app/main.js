@@ -2,7 +2,7 @@ import './style.css';
 import { Map, View } from 'ol';
 import { ImageWMS, TileWMS } from 'ol/source'
 import { Image, Tile } from 'ol/layer'
-import { addPoint, removePoint, vectorLayer } from './map/point';
+import { addLine, removeLine, vectorLayer, vectorSource } from './map/line';
 import { addMeasure, removeMeasure } from './map/measure';
 import { scaleControl } from './map/scale';
 import { zoomControl } from './map/zoom';
@@ -79,5 +79,11 @@ function addInteraction(interactionFunction, removeInteractionFunction) {
 }
 
 document.getElementById("measure").addEventListener("click", () => addInteraction(addMeasure, removeMeasure))
-document.getElementById("point").addEventListener("click", () => addInteraction(addPoint, removePoint))
+document.getElementById("line").addEventListener("click", () => addInteraction(addLine, removeLine))
 document.getElementById("clear").addEventListener("click", () => addInteraction(clearMap, () => {}))
+
+
+document.getElementById("save_line").addEventListener("click", (e) => {
+  console.log(vectorSource.getFeatures())
+})
+
