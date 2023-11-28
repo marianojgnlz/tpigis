@@ -10,3 +10,12 @@ html, body {
   bottom: 0;
   width: 100%;
 }
+
+.interactions {
+  position: relative;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  padding-top: 10px;
+  padding-left: 50px;
+}
