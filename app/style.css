@@ -19,3 +19,20 @@ html, body {
   padding-top: 10px;
   padding-left: 50px;
 }
+
+.container{
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 300px;
+  height: 100%;
+  padding-left: 50px;
+  background-color: white;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+ 
+}
+
+#capas{
+  position: relative;
+  padding-left: 50px;
+}
