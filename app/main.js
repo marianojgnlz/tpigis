@@ -2,6 +2,11 @@ import './style.css';
 import { Map, View } from 'ol';
 import { ImageWMS, TileWMS } from 'ol/source'
 import { Image, Tile } from 'ol/layer'
+import Overlay from 'ol/Overlay'
+import Draw from 'ol/interaction/Draw'
+import { Style, Fill, Stroke, Circle as CircleStyle } from 'ol/style'
+import { Vector as VectorSource } from 'ol/source';
+import { getLength } from 'ol/sphere';
 import { addPoint, removePoint, vectorLayer } from './map/point';
 import { addMeasure, removeMeasure } from './map/measure';
 import { scaleControl } from './map/scale';
@@ -10,13 +15,60 @@ import { clearMap } from './map/clear';
 
 const url = "http://localhost/cgi-bin/qgis_mapserv.fcgi?map=/usr/local/share/qgis/TPI.qgz"
 
-// Seleccionar capas 🤪TEAMO
+var helpTooltip;
+var helpTooltipElement = document.createElement('div');
+helpTooltipElement.className = 'ol-tooltip';
+helpTooltip = new Overlay({
+    element: helpTooltipElement,
+    offset: [15, 0],
+    positioning: 'center-left',
+});
 
+// const draw = new Draw({
+//   source: new VectorSource(),
+//   type: 'LineString',
+//   style: new Style({
+//       fill: new Fill({
+//           color: 'rgba(255, 255, 255, 0.2)',
+//       }),
+//       stroke: new Stroke({
+//           color: 'rgba(0, 0, 0, 0.5)',
+//           lineDash: [10, 10],
+//           width: 2,
+//       }),
+//       image: new CircleStyle({
+//           radius: 5,
+//           stroke: new Stroke({
+//               color: 'rgba(0, 0, 0, 0.7)',
+//           }),
+//           fill: new Fill({
+//               color: 'rgba(255, 255, 255, 0.2)',
+//           }),
+//       }),
+//   }),
+// });
 
-//var layerSwitcher = new ol.control.LayerSwitcher({
-//  tipLabel: 'Leyenda' // Etiqueta para el control de leyenda
-//});
+// var pointerMoveHandler = function (evt) {
+//   if (evt.dragging) {
+//       return;
+//   }
 
+//   var helpMsg = 'Click para empezar';
+
+//   helpTooltipElement.innerHTML = helpMsg;
+//   helpTooltip.setPosition(evt.coordinate);
+
+// };
+
+// var measureTooltipElement = document.createElement('div');
+// measureTooltipElement.className = 'ol-tooltip ol-tooltip-measure';
+// const measureTooltip = new Overlay({
+//   element: measureTooltipElement,
+//   offset: [0, -15],
+//   positioning: 'bottom-center',
+// });
+
+//SE AÑADEN LAS CAPAS
 const act_agrop = new Image({
   title: "Actividades Agropecuarias",
   visible: false,
@@ -605,17 +657,63 @@ const map = new Map({
   })
 });
 
-map.addControl(layerSwitcher);
+//SEleccion de capas
+const capas = [act_agrop, act_economicas, comp_energia, cur_agua, curvas_nivel, edif_construcciones_turisticas, edif_depor_y_esparcimiento, edif_educacion, edif_religiosos, edif_seguridad, edif_publico, edif_ferroviarios, edif_salud, ejido, espejos_de_agua, estructuras_portuarias, infraest_aeroportuaria_punto, infraest_hidro, isla, limite_politico_administrativo, lineas_de_conduccion_ene, localidad, marcas_y_senales, muro_embalse, obra_portuaria, obras_de_comunicacion, otras_edificaciones, pais, provincias, puente_red_vial_punto, puntos_alturas_topograficas, puntos_del_terreno, red_ferroviaria, red_vial, salvado_de_obstaculo, senalizaciones, sue_congelado, sue_consolidado, sue_costero, sue_hidromorfologico, sue_no_consolidado, veg_cultivos, veg_arborea, veg_arbustiva, veg_hidrofila, veg_suelo_desnudo, vias_secundarias]
 
-let removePreviousInteraction = (map) => {}
-function addInteraction(interactionFunction, removeInteractionFunction) {
-  map.getViewport().style.cursor = 'auto';
-  clearMap(map);
-  removePreviousInteraction(map)
-  interactionFunction(map)
-  removePreviousInteraction = removeInteractionFunction
-}
+capas.forEach((capa, index) => {
+  // Crea un checkbox
+  var checkbox = document.createElement('input');
+  checkbox.type = 'checkbox';
+  checkbox.id = 'check_layer_' + index; // Asigna un ID único a cada checkbox
+  checkbox.checked = capa.getVisible();
 
-document.getElementById("measure").addEventListener("click", () => addInteraction(addMeasure, removeMeasure))
-document.getElementById("point").addEventListener("click", () => addInteraction(addPoint, removePoint))
-document.getElementById("clear").addEventListener("click", () => addInteraction(clearMap, () => {}))
+ // Agrega un listener al evento 'change' del checkbox
+ checkbox.addEventListener('change', function () {
+  var checked = this.checked;
+  if (checked !== capa.getVisible()) {
+      capa.setVisible(checked);
+  }
+});
+// Agrega un listener al evento 'change:visible' de la capa
+capa.on('change:visible', function () {
+  var visible = this.getVisible();
+  if (visible !== checkbox.checked) {
+      checkbox.checked = visible;
+  }
+});
+
+// Crea una etiqueta para el checkbox
+var label = document.createElement('label');
+label.appendChild(checkbox);
+label.appendChild(document.createTextNode(capa.get('title'))); // Puedes usar el título de la capa como texto de la etiqueta
+
+var container = document.getElementById('capasContainer'); // Reemplaza 'checkboxContainer' con el ID de tu contenedor
+    container.appendChild(label)})
+
+
+
+//MEdicion
+map.addOverlay(helpTooltip);
+map.addOverlay(measureTooltip);
+
+map.on('pointermove', pointerMoveHandler);
+map.addInteraction(draw);
+
+map.getViewport().style.cursor = 'none';
+
+var formatLength = function (line) {
+  var length = getLength(line);
+  var output = Math.round(length * 10000) / 100 + ' ' + 'km';
+  return output;
+};
+draw.on('drawstart', function (evt) {
+  helpTooltipElement.classList.add('hidden');
+  var sketch = evt.feature;
+  sketch.getGeometry().on('change', function (evt) {
+      var geom = evt.target;
+      var tooltipCoord = geom.getLastCoordinate();
+      measureTooltipElement.innerHTML = formatLength(geom);
+      measureTooltip.setPosition(tooltipCoord);
+  });
+});
+
