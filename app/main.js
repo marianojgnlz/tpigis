@@ -7,6 +7,8 @@ import { addMeasure, removeMeasure } from './map/measure';
 import { scaleControl } from './map/scale';
 import { zoomControl } from './map/zoom';
 import { clearMap } from './map/clear';
+import { extendFlatCoordinates } from 'ol/extent';
+import { addNavigate, removeNavigate } from './map/navigate';
 
 const url = "http://localhost/cgi-bin/qgis_mapserv.fcgi?map=/usr/local/share/qgis/TPI.qgz"
 
@@ -80,10 +82,6 @@ function addInteraction(interactionFunction, removeInteractionFunction) {
 
 document.getElementById("measure").addEventListener("click", () => addInteraction(addMeasure, removeMeasure))
 document.getElementById("line").addEventListener("click", () => addInteraction(addLine, removeLine))
-document.getElementById("clear").addEventListener("click", () => addInteraction(clearMap, () => {}))
-
-
-document.getElementById("save_line").addEventListener("click", (e) => {
-  console.log(vectorSource.getFeatures())
-})
+document.getElementById("navigate").addEventListener("click", () => addInteraction(addNavigate, removeNavigate))
+// document.getElementById("clear").addEventListener("click", () => addInteraction(clearMap, () => {}))
 

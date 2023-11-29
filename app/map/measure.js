@@ -23,7 +23,7 @@ var pointerMoveHandler = function (evt) {
         return;
     }
 
-    var helpMsg = 'Click para empezar';
+    var helpMsg = 'SELECCIONAR PUNTO';
 
     helpTooltipElement.innerHTML = helpMsg;
     helpTooltip.setPosition(evt.coordinate);
