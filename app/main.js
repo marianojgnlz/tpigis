@@ -613,7 +613,7 @@ const map = new Map({
   })
 });
 
-//SEleccion de capas
+//Seleccion de capas
 const capas = [act_agrop, act_economicas, comp_energia, cur_agua, curvas_nivel, edif_construcciones_turisticas, edif_depor_y_esparcimiento, edif_educacion, edif_religiosos, edif_seguridad, edif_publico, edif_ferroviarios, edif_salud, ejido, espejos_de_agua, estructuras_portuarias, infraest_aeroportuaria_punto, infraest_hidro, isla, limite_politico_administrativo, lineas_de_conduccion_ene, localidad, marcas_y_senales, muro_embalse, obra_portuaria, obras_de_comunicacion, otras_edificaciones, pais, provincias, puente_red_vial_punto, puntos_alturas_topograficas, puntos_del_terreno, red_ferroviaria, red_vial, salvado_de_obstaculo, senalizaciones, sue_congelado, sue_consolidado, sue_costero, sue_hidromorfologico, sue_no_consolidado, veg_cultivos, veg_arborea, veg_arbustiva, veg_hidrofila, veg_suelo_desnudo, vias_secundarias]
 
 const leyendaURL = (layerName, e) => {
@@ -628,6 +628,27 @@ const leyendaURL = (layerName, e) => {
   return wmsSource.getLegendUrl();
 }
 
+//actualizar leyendas
+const actualizarLeyenda =(index) => {
+  const capasSeleccionadas = capas.filter((capa) => capa.getVisible());
+  const img= document.querySelector('#leyenda');
+
+  if (capasSeleccionadas.length>0 && index>-1 ){
+    const layerName = capas[index].getSource().getParams().LAYERS;
+    const leyendaIMG = leyendaURL(layerName,img);
+    img.src=leyendaIMG;
+    img.style.display= 'block';
+  } else if (index=-1){
+    const layerName = capasSeleccionadas[0].getSource().getParams().LAYERS;
+    const leyendaIMG = leyendaURL(layerName,img);
+    img.src=leyendaIMG;
+    img.style.display= 'block';
+  }else{
+    img.src='';
+    img.style.display= 'none';}
+};
+
+
 capas.forEach((capa, index) => {
   // Crea un checkbox
   var checkbox = document.createElement('input');
@@ -639,23 +660,12 @@ capas.forEach((capa, index) => {
  checkbox.addEventListener('change', function () {
     var checked = this.checked;
     if (checked !== capa.getVisible()) {
-        capa.setVisible(checked);
+        capa.setVisible(checked); 
+        const index1 = checked ? index : -1; //hacemos un op ternario duh
+        actualizarLeyenda(index1);
     }
-    // obtenemos la imagen wms de la capa
-    let img = document.querySelector("#leyenda");
-    let layerName = capa.getSource().getParams().LAYERS;
-    let leyendaIMG = leyendaURL(layerName, img);
-
-    img.src = leyendaIMG;
   });
 
-// Agrega un listener al evento 'change:visible' de la capa
-capa.on('change:visible', function () {
-  var visible = this.getVisible();
-  if (visible !== checkbox.checked) {
-      checkbox.checked = visible;
-  }
-});
 
 // Crea una etiqueta para el checkbox
 var label = document.createElement('label');
