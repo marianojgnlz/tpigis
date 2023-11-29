@@ -15,6 +15,7 @@ import { always } from 'ol/events/condition';
 
 const url = "http://localhost/cgi-bin/qgis_mapserv.fcgi?map=/usr/local/share/qgis/TPI.qgz"
 
+
 var helpTooltip;
 var helpTooltipElement = document.createElement('div');
 helpTooltipElement.className = 'ol-tooltip';
@@ -583,8 +584,7 @@ const map = new Map({
     obra_portuaria,
     obras_de_comunicacion,
     otras_edificaciones,
-    pais,
-    provincias,
+    
     puente_red_vial_punto,
     puntos_alturas_topograficas,
     puntos_del_terreno,
@@ -603,6 +603,8 @@ const map = new Map({
     veg_hidrofila,
     veg_suelo_desnudo,
     vias_secundarias,
+    pais,
+    provincias,
     vectorLayer
 
   ],
@@ -701,10 +703,10 @@ document.getElementById("save_line").addEventListener("click", (e) => {
 
 //Consulta punto y rectangulo 
 
-var consultar = function (coordinate) {
+var consultar = function (coordinate, capaConsultada) {
 
 
-  console.log(coordinate);
+  console.log(coordinate,capaConsultada);
   if (coordinate.length == 2) {
       //es un punto [lon,lat]
       var wkt = 'POINT(' + coordinate[0] + ' ' + coordinate[1] + ')';
@@ -716,9 +718,11 @@ var consultar = function (coordinate) {
       }
       wkt += coordinate[0][0][0] + ' ' + coordinate[0][0][1] + '))'
   }
-  console.log(wkt);
-  return;
+    console.log(wkt);
+   return;
 
+
+  
 };
 
 
