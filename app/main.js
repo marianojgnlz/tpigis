@@ -4,15 +4,14 @@ import { ImageWMS, TileWMS } from 'ol/source'
 import { Image, Tile } from 'ol/layer'
 import { addLine, removeLine, vectorLayer, vectorSource } from './map/line';
 import Overlay from 'ol/Overlay'
-import Draw from 'ol/interaction/Draw'
-import { Style, Fill, Stroke, Circle as CircleStyle } from 'ol/style'
-import { Vector as VectorSource } from 'ol/source';
 import { getLength } from 'ol/sphere';
-import { addPoint, removePoint, vectorLayer } from './map/point';
 import { addMeasure, removeMeasure } from './map/measure';
 import { scaleControl } from './map/scale';
 import { zoomControl } from './map/zoom';
 import { clearMap } from './map/clear';
+import { DragBox } from 'ol/interaction';
+import { Style, Stroke } from 'ol/style';
+import { always } from 'ol/events/condition';
 
 const url = "http://localhost/cgi-bin/qgis_mapserv.fcgi?map=/usr/local/share/qgis/TPI.qgz"
 
@@ -24,50 +23,6 @@ helpTooltip = new Overlay({
     offset: [15, 0],
     positioning: 'center-left',
 });
-
-// const draw = new Draw({
-//   source: new VectorSource(),
-//   type: 'LineString',
-//   style: new Style({
-//       fill: new Fill({
-//           color: 'rgba(255, 255, 255, 0.2)',
-//       }),
-//       stroke: new Stroke({
-//           color: 'rgba(0, 0, 0, 0.5)',
-//           lineDash: [10, 10],
-//           width: 2,
-//       }),
-//       image: new CircleStyle({
-//           radius: 5,
-//           stroke: new Stroke({
-//               color: 'rgba(0, 0, 0, 0.7)',
-//           }),
-//           fill: new Fill({
-//               color: 'rgba(255, 255, 255, 0.2)',
-//           }),
-//       }),
-//   }),
-// });
-
-// var pointerMoveHandler = function (evt) {
-//   if (evt.dragging) {
-//       return;
-//   }
-
-//   var helpMsg = 'Click para empezar';
-
-//   helpTooltipElement.innerHTML = helpMsg;
-//   helpTooltip.setPosition(evt.coordinate);
-
-// };
-
-// var measureTooltipElement = document.createElement('div');
-// measureTooltipElement.className = 'ol-tooltip ol-tooltip-measure';
-// const measureTooltip = new Overlay({
-//   element: measureTooltipElement,
-//   offset: [0, -15],
-//   positioning: 'bottom-center',
-// });
 
 //SE AÑADEN LAS CAPAS
 const act_agrop = new Image({
@@ -661,6 +616,18 @@ const map = new Map({
 //SEleccion de capas
 const capas = [act_agrop, act_economicas, comp_energia, cur_agua, curvas_nivel, edif_construcciones_turisticas, edif_depor_y_esparcimiento, edif_educacion, edif_religiosos, edif_seguridad, edif_publico, edif_ferroviarios, edif_salud, ejido, espejos_de_agua, estructuras_portuarias, infraest_aeroportuaria_punto, infraest_hidro, isla, limite_politico_administrativo, lineas_de_conduccion_ene, localidad, marcas_y_senales, muro_embalse, obra_portuaria, obras_de_comunicacion, otras_edificaciones, pais, provincias, puente_red_vial_punto, puntos_alturas_topograficas, puntos_del_terreno, red_ferroviaria, red_vial, salvado_de_obstaculo, senalizaciones, sue_congelado, sue_consolidado, sue_costero, sue_hidromorfologico, sue_no_consolidado, veg_cultivos, veg_arborea, veg_arbustiva, veg_hidrofila, veg_suelo_desnudo, vias_secundarias]
 
+const leyendaURL = (layerName, e) => {
+  const wmsSource = new ImageWMS({
+    url: url + '&TRANSPARENT=TRUE&ITEMFONTCOLOR=0x213547',
+    params: {
+      LAYERS: layerName,
+      FORMAT: 'image/png'
+    }
+  })
+
+  return wmsSource.getLegendUrl();
+}
+
 capas.forEach((capa, index) => {
   // Crea un checkbox
   var checkbox = document.createElement('input');
@@ -670,11 +637,18 @@ capas.forEach((capa, index) => {
 
  // Agrega un listener al evento 'change' del checkbox
  checkbox.addEventListener('change', function () {
-  var checked = this.checked;
-  if (checked !== capa.getVisible()) {
-      capa.setVisible(checked);
-  }
-});
+    var checked = this.checked;
+    if (checked !== capa.getVisible()) {
+        capa.setVisible(checked);
+    }
+    // obtenemos la imagen wms de la capa
+    let img = document.querySelector("#leyenda");
+    let layerName = capa.getSource().getParams().LAYERS;
+    let leyendaIMG = leyendaURL(layerName, img);
+
+    img.src = leyendaIMG;
+  });
+
 // Agrega un listener al evento 'change:visible' de la capa
 capa.on('change:visible', function () {
   var visible = this.getVisible();
@@ -694,32 +668,6 @@ var container = document.getElementById('capasContainer'); // Reemplaza 'checkbo
 
 
 //MEdicion
-map.addOverlay(helpTooltip);
-map.addOverlay(measureTooltip);
-
-map.on('pointermove', pointerMoveHandler);
-map.addInteraction(draw);
-
-map.getViewport().style.cursor = 'none';
-
-var formatLength = function (line) {
-  var length = getLength(line);
-  var output = Math.round(length * 10000) / 100 + ' ' + 'km';
-  return output;
-};
-
-draw.on('drawstart', function (evt) {
-  helpTooltipElement.classList.add('hidden');
-  var sketch = evt.feature;
-  sketch.getGeometry().on('change', function (evt) {
-      var geom = evt.target;
-      var tooltipCoord = geom.getLastCoordinate();
-      measureTooltipElement.innerHTML = formatLength(geom);
-      measureTooltip.setPosition(tooltipCoord);
-  });
-});
-
-//map.addControl(layerSwitcher);
 
 let removePreviousInteraction = (map) => {}
 function addInteraction(interactionFunction, removeInteractionFunction) {
@@ -738,4 +686,76 @@ document.getElementById("clear").addEventListener("click", () => addInteraction(
 document.getElementById("save_line").addEventListener("click", (e) => {
   console.log(vectorSource.getFeatures())
 })
+
+//Consulta punto y rectangulo 
+
+var consultar = function (coordinate) {
+
+
+  console.log(coordinate);
+  if (coordinate.length == 2) {
+      //es un punto [lon,lat]
+      var wkt = 'POINT(' + coordinate[0] + ' ' + coordinate[1] + ')';
+  } else {
+      //es un poligono en la forma [ [ [lon,lat],[lon,lat],....] ]
+      var wkt = 'POLYGON((';
+      for (var i = 0; i < coordinate[0].length - 1; i++) {
+          wkt += coordinate[0][i][0] + ' ' + coordinate[0][i][1] + ',';
+      }
+      wkt += coordinate[0][0][0] + ' ' + coordinate[0][0][1] + '))'
+  }
+  console.log(wkt);
+  return;
+
+};
+
+
+var selectInteraction = new DragBox({
+  condition: always, //noModifierKeys
+  style: new Style({
+      stroke: new Stroke({
+          color: [0, 0, 255, 1]
+      })
+  })
+});
+
+
+selectInteraction.on('boxend', function (evt) {
+  //this: referencia al selectInteraction
+  console.log('boxend', this.getGeometry().getCoordinates());
+  consultar(selectInteraction.getGeometry().getCoordinates());
+
+});
+
+//funcion para el evento click en el mapa
+var clickEnMapa = function (evt) {
+  //muestro por consola las coordenadas del evento
+  console.log('click', evt.coordinate);
+  consultar(evt.coordinate);
+};
+
+//function para "cambiar" de interaction en function del value de los radios
+var seleccionarControl = function (el) {
+  console.log(el)
+  if (el.target.value == "consulta") {
+      //agrego la interaccion del dragbox
+      //la cual tiene precedencia sobre las otras
+      map.addInteraction(selectInteraction);
+
+      //subscribo una funcion al evento click del mapa
+      map.on('click', clickEnMapa);
+
+  } else if (el.target.value == "navegacion") {
+      //la remuevo...
+      map.removeInteraction(selectInteraction);
+      //remueveo la subscripcion de la funcion al evento click del mapa
+      map.un('click', clickEnMapa);
+  }
+  //muestro por consola el valor
+  console.log(el.target.value);
+};
+
+document.querySelector("#controles_navegacion").addEventListener('change', seleccionarControl)
+document.querySelector("#controles_consulta").addEventListener('change', seleccionarControl)
+
 
