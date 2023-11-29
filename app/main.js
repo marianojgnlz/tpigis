@@ -633,17 +633,12 @@ const actualizarLeyenda =(index) => {
   const capasSeleccionadas = capas.filter((capa) => capa.getVisible());
   const img= document.querySelector('#leyenda');
 
-  if (capasSeleccionadas.length>0 && index>-1 ){
-    const layerName = capas[index].getSource().getParams().LAYERS;
+  if (capasSeleccionadas.length>0 ){
+    const layerName = (index !== -1) ? capas[index].getSource().getParams().LAYERS: capasSeleccionadas[0].getSource().getParams().LAYERS;
     const leyendaIMG = leyendaURL(layerName,img);
     img.src=leyendaIMG;
     img.style.display= 'block';
-  } else if (index=-1){
-    const layerName = capasSeleccionadas[0].getSource().getParams().LAYERS;
-    const leyendaIMG = leyendaURL(layerName,img);
-    img.src=leyendaIMG;
-    img.style.display= 'block';
-  }else{
+  } else { 
     img.src='';
     img.style.display= 'none';}
 };
@@ -661,11 +656,18 @@ capas.forEach((capa, index) => {
     var checked = this.checked;
     if (checked !== capa.getVisible()) {
         capa.setVisible(checked); 
-        const index1 = checked ? index : -1; //hacemos un op ternario duh
+        const index1 = checked ? index : -1;
         actualizarLeyenda(index1);
+    
     }
-  });
+   
+    // obtenemos la imagen wms de la capa
+    // let img = document.querySelector("#leyenda");
+    // let layerName = capa.getSource().getParams().LAYERS;
+    // let leyendaIMG = leyendaURL(layerName, img);
 
+    // img.src = leyendaIMG;
+  });
 
 // Crea una etiqueta para el checkbox
 var label = document.createElement('label');
