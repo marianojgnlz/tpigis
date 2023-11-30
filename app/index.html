@@ -1,54 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/x-icon" href="https://openlayers.org/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>TPI-GIS</title>
 
-  </head>
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/x-icon" href="https://openlayers.org/favicon.ico" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TPI-GIS</title>
 
-  <body>
-    <!-- <div id="header"> -->
-   
-    <div id="map"></div>
+</head>
+
+<body>
+  <div id="map"></div>
+
+  <div class="container">
+    <div class="consultas">
+      <h3>Menu</h3>
+      <input type="radio" name="controles" id="controles_navegacion" value="navegacion" checked="checked">
+      <label for="controles_navegacion">Navegacion</label>
+      <br />
+      <input type="radio" name="controles" id="controles_consulta" value="consulta">
+      <label for="controles_consulta">Consulta</label>
+      <br />
+      <input type="radio" name="controles" id="measure" value="consulta">
+      <label for="measure">Medir</label>
+      <br />
+      <input type="radio" name="controles" id="line" value="line">
+      <label for="line">Recorrido</label>
+      <br />
     </div>
-
-    <div class="container">
-        <h3>Capas</h3> 
-        <div id="capasContainer"></div>
-         
-         <div id="leyendaContainer">
-           <img id="leyenda" src="" /> 
-        </div> 
-        <h3>Herramientas</h3>
-        <div class="interactions">
-          <button id="measure">Medir</button>
-          <button id="line">Linea</button>
-          <button id="save_line">Guardar</button>
-          <button id="clear">Limpiar</button>
-        </div>
-        <h3>Consulta</h3>
-        <div class="consultas">
-          <!-- evento onchange: ejecuta la funcion seleccionarControl -->
-          <input type="radio" name="controles" id="controles_navegacion" value="navegacion" checked="checked"
-              > <label for="controles_navegacion"> Navegacion</label><br />
-          <input type="radio" name="controles" id="controles_consulta" value="consulta"> <label for="controles_consulta"> Consulta</label><br />
-
-        </div>
+    <div>
+      <h3>Capas</h3>
+      <div id="capasContainer"></div>
     </div>
-    
+    <div id="leyendaContainer">
+      <img id="leyenda" src="" />
+    </div>
+  </div>
 
-    <dialog id="add_feature_dialog">
-      <input id="feature_name" type="text" />
-      <button id="modal_button">guardar</button>
-    </dialog>
 
-    <dialog id="request">
-      <button id="requestButton">X</button>
-        
-    </dialog>
-    
-    <script type="module" src="./main.js"></script>
-  </body>
+  <dialog id="add_feature_dialog">
+    <input id="feature_name" type="text" />
+    <button id="modal_button">Guardar</button>
+  </dialog>
+
+  <dialog id="request">
+    <button id="requestButton">X</button>
+  </dialog>
+
+  <script type="module" src="./main.js"></script>
+</body>
+
 </html>

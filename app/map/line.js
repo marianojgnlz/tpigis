@@ -52,15 +52,16 @@ let name = ''
 let feature = null
 
 document.getElementById('feature_name').addEventListener('change', (event) => {
-    name = event.target.value
+    name = event.target.value;
 })
 document.getElementById('modal_button').addEventListener('click', () => {
-    addFeature()
-    document.getElementById('add_feature_dialog').close()
+    addFeature();
+    document.getElementById('feature_name').value = '';
+    document.getElementById('add_feature_dialog').close();
 })
 
 export function addLine(map) {
-    vectorLayer.setVisible(true)
+    vectorLayer.setVisible(true);
     map.addInteraction(LineDraw);
     map.getViewport().style.cursor = 'none';
     vectorSource.on('addfeature', (event) => {
