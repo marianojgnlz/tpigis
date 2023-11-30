@@ -4,13 +4,10 @@ import { ImageWMS, TileWMS } from 'ol/source'
 import { Image, Tile } from 'ol/layer'
 import { addLine, removeLine, vectorLayer, vectorSource } from './map/line';
 import Overlay from 'ol/Overlay'
-import { getLength } from 'ol/sphere';
 import { addMeasure, removeMeasure } from './map/measure';
 import { scaleControl } from './map/scale';
 import { zoomControl } from './map/zoom';
 import { clearMap } from './map/clear';
-import { extendFlatCoordinates } from 'ol/extent';
-import { addNavigate, removeNavigate } from './map/navigate';
 import { DragBox } from 'ol/interaction';
 import { Style, Stroke } from 'ol/style';
 import { always } from 'ol/events/condition';
@@ -698,7 +695,7 @@ function addInteraction(interactionFunction, removeInteractionFunction) {
 
 document.getElementById("measure").addEventListener("click", () => addInteraction(addMeasure, removeMeasure))
 document.getElementById("line").addEventListener("click", () => addInteraction(addLine, removeLine))
-document.getElementById("navigate").addEventListener("click", () => addInteraction(addNavigate, removeNavigate))
+//document.getElementById("navigate").addEventListener("click", () => addInteraction(addNavigate, removeNavigate))
 // document.getElementById("clear").addEventListener("click", () => addInteraction(clearMap, () => {}))
 
 //Consulta punto y rectangulo 
