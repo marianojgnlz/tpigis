@@ -86,3 +86,33 @@ button{
   border-radius: 0.5rem;
 }
 
+table {
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+td, th {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
+
+tr:nth-child(even) {
+  background-color: #dddddd;
+}
+
+#request {
+  max-height: 80vh;
+}
+
+.requestShow {
+  display: flex;
+  flex-direction: column;
+}
+
+#requestButton {
+  max-width: 30px;
+  align-self: end;
+}
+

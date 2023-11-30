@@ -12,9 +12,9 @@ app.use(cors());
 
 const columnas_inservibles = ["gid","__gid", "geom","situación", "precisión", "escala", "signo", 
 "fuente", "operador", "dataset", "fclass", "esc",
-"t_act", "coord", "sp", "datum", "ac", "administra", "progreso", "responsabl",
+"t_act", "coord", "sp", "datum", "ac", "administra", "progreso",
 "revestimie", "igds_style", "igds_type", "igds_weigh", "igds_level", "igds_color", "group", "rotation",  "km_inicial", "de_carga",
-"actualizac", "cell_name", "cargo",
+"actualizac", "cell_name",
 "opeador", "admin", "libre_hz", "libre_vcal", "capacidad", "largo", "precision", "coincide", "contenido", "cuenca", "electrific", "concesión"]
 
 function consultar(consulta) {
@@ -59,11 +59,12 @@ app.get('/', (req, res) => {
 
 
 app.post('/punto', (req, res) => {
-    const wkt = 'POINT(' + req.body.coordinates[0] + ' ' + req.body.coordinates[1] + ')'
+    const { coordinates, tabla } = req.body;
+    const wkt = 'POINT(' + coordinates[0] + ' ' + coordinates[1] + ')'
 
     const tolerancia = 4 // pixeles
 
-    const consulta = `SELECT *, ST_AsGeoJSON(geom) as GEOJSON FROM ${req.body.tabla} WHERE
+    const consulta = `SELECT *, ST_AsGeoJSON(geom) as GEOJSON FROM ${tabla} WHERE
             st_dwithin(
                 ST_geomfromtext('${wkt}', 4326),
                 geom,
@@ -78,14 +79,15 @@ app.post('/punto', (req, res) => {
 })
 
 app.post('/caja', (req, res) => {
-    const coordinate = req.body.coordinates;
-    var wkt = 'POLYGON(('
-    for (var i = 0; i < coordinate[0].length - 1; i++) {
-        wkt += coordinate[0][i][0] + ' ' + coordinate[0][i][1] + ','
-    }
-    wkt += coordinate[0][0][0] + ' ' + coordinate[0][0][1] + '))'
+    const { coordinates, tabla } = req.body;
 
-    const consulta = `SELECT *, ST_AsGeoJSON(geom) as GEOJSON FROM ${req.body.tabla} WHERE
+    var wkt = 'POLYGON(('
+    for (var i = 0; i < coordinates[0].length - 1; i++) {
+        wkt += coordinates[0][i][0] + ' ' + coordinates[0][i][1] + ','
+    }
+    wkt += coordinates[0][0][0] + ' ' + coordinates[0][0][1] + '))'
+
+    const consulta = `SELECT *, ST_AsGeoJSON(geom) as GEOJSON FROM ${tabla} WHERE
             st_intersects(
                 ST_geomfromtext('${wkt}', 4326),
                 geom

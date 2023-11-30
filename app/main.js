@@ -11,6 +11,7 @@ import { clearMap } from './map/clear';
 import { DragBox } from 'ol/interaction';
 import { Style, Stroke } from 'ol/style';
 import { always } from 'ol/events/condition';
+import { boxRequest, pointRequest } from './map/request'
 
 const url = "http://localhost/cgi-bin/qgis_mapserv.fcgi?map=/usr/local/share/qgis/TPI.qgz"
 
@@ -542,6 +543,12 @@ const provincias = new Image({
   })
 });
 
+const view = new View({
+  projection: 'EPSG:4326',
+  center: [-59, -27.5],
+  zoom: 6
+});
+
 const map = new Map({
   target: 'map',
   controls: [zoomControl, scaleControl],
@@ -607,11 +614,7 @@ const map = new Map({
     vectorLayer
 
   ],
-  view: new View({
-    projection: 'EPSG:4326',
-    center: [-59, -27.5],
-    zoom: 6
-  })
+  view: view
 });
 
 //Seleccion de capas
@@ -643,14 +646,6 @@ const actualizarLeyenda =(index) => {
     img.src='';
     img.style.display= 'none';}
 };
-
-const variable1= (wkt) =>
-{
-  const $capasSeleccionadas = document.querySelectorAll('input[id^="check"]:checked')
-  const capasSeleccionadas = $capasSeleccionadas.map(e=>
-    e.getAttribute('alt'))
- 
-}
 
 capas.forEach((capa, index) => {
   // Crea un checkbox
@@ -698,31 +693,6 @@ document.getElementById("line").addEventListener("click", () => addInteraction(a
 //document.getElementById("navigate").addEventListener("click", () => addInteraction(addNavigate, removeNavigate))
 // document.getElementById("clear").addEventListener("click", () => addInteraction(clearMap, () => {}))
 
-//Consulta punto y rectangulo 
-
-var consultar = function (coordinate, capaConsultada) {
-
-
-  console.log(coordinate,capaConsultada);
-  if (coordinate.length == 2) {
-      //es un punto [lon,lat]
-      var wkt = 'POINT(' + coordinate[0] + ' ' + coordinate[1] + ')';
-  } else {
-      //es un poligono en la forma [ [ [lon,lat],[lon,lat],....] ]
-      var wkt = 'POLYGON((';
-      for (var i = 0; i < coordinate[0].length - 1; i++) {
-          wkt += coordinate[0][i][0] + ' ' + coordinate[0][i][1] + ',';
-      }
-      wkt += coordinate[0][0][0] + ' ' + coordinate[0][0][1] + '))'
-  }
-    console.log(wkt);
-   return;
-
-
-  
-};
-
-
 var selectInteraction = new DragBox({
   condition: always, //noModifierKeys
   style: new Style({
@@ -735,40 +705,45 @@ var selectInteraction = new DragBox({
 
 selectInteraction.on('boxend', function (evt) {
   //this: referencia al selectInteraction
-  console.log('boxend', this.getGeometry().getCoordinates());
-  consultar(selectInteraction.getGeometry().getCoordinates());
 
+  const $capasSeleccionadas = document.querySelectorAll('input[id^="check"]:checked')
+  const capasSeleccionadas = [...$capasSeleccionadas].map(e => e.getAttribute('alt'));
+
+  boxRequest(this.getGeometry().getCoordinates(), capasSeleccionadas[0])
 });
 
 //funcion para el evento click en el mapa
 var clickEnMapa = function (evt) {
   //muestro por consola las coordenadas del evento
   console.log('click', evt.coordinate);
-  consultar(evt.coordinate);
+
+  const $capasSeleccionadas = document.querySelectorAll('input[id^="check"]:checked')
+  const capasSeleccionadas = [...$capasSeleccionadas].map(e => e.getAttribute('alt'));
+
+  pointRequest(evt.coordinate, capasSeleccionadas[0], view.getResolution())
 };
 
 //function para "cambiar" de interaction en function del value de los radios
 var seleccionarControl = function (el) {
-  console.log(el)
   if (el.target.value == "consulta") {
-      //agrego la interaccion del dragbox
-      //la cual tiene precedencia sobre las otras
       map.addInteraction(selectInteraction);
-
-      //subscribo una funcion al evento click del mapa
       map.on('click', clickEnMapa);
 
   } else if (el.target.value == "navegacion") {
-      //la remuevo...
       map.removeInteraction(selectInteraction);
-      //remueveo la subscripcion de la funcion al evento click del mapa
       map.un('click', clickEnMapa);
   }
-  //muestro por consola el valor
   console.log(el.target.value);
 };
 
 document.querySelector("#controles_navegacion").addEventListener('change', seleccionarControl)
 document.querySelector("#controles_consulta").addEventListener('change', seleccionarControl)
 
-
+document.querySelector("#requestButton")
+  .addEventListener("click", () => {
+    const modal = document.querySelector("#request");
+    modal.classList.remove("requestShow");
+    const table = document.querySelector("table");
+    modal.removeChild(table);
+    modal.close();
+  })
