@@ -645,11 +645,19 @@ const actualizarLeyenda =(index) => {
     img.style.display= 'none';}
 };
 
+const variable1= (wkt) =>
+{
+  const $capasSeleccionadas = document.querySelectorAll('input[id^="check"]:checked')
+  const capasSeleccionadas = $capasSeleccionadas.map(e=>
+    e.getAttribute('alt'))
+ 
+}
 
 capas.forEach((capa, index) => {
   // Crea un checkbox
   var checkbox = document.createElement('input');
   checkbox.type = 'checkbox';
+  checkbox.setAttribute('alt', capa.getSource().getParams().LAYERS );
   checkbox.id = 'check_layer_' + index; // Asigna un ID único a cada checkbox
   checkbox.checked = capa.getVisible();
 
@@ -662,13 +670,7 @@ capas.forEach((capa, index) => {
         actualizarLeyenda(index1);
     
     }
-   
-    // obtenemos la imagen wms de la capa
-    // let img = document.querySelector("#leyenda");
-    // let layerName = capa.getSource().getParams().LAYERS;
-    // let leyendaIMG = leyendaURL(layerName, img);
-
-    // img.src = leyendaIMG;
+ 
   });
 
 // Crea una etiqueta para el checkbox
